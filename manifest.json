@@ -1,0 +1,22 @@
+{
+	"manifest_version": 2,
+  "name": "Muter",
+  "description": "Mute SNS messages",
+  "version": "1.0",
+  "author": "Decoy Box",
+
+"browser_action": {
+  "default_icon": "popup/icon.png",
+  "default_title": "Muter Test",
+  "default_popup": "popup/popup.html"
+ },
+
+"content_scripts": [
+	{
+		"matches": ["http://*.deviantart.com/*", "https://*.deviantart.com/*"],
+		"js": ["js/jquery-3.3.1.min.js", "js/script.js"]
+  }
+],
+
+	"permissions": ["activeTab"]
+}
