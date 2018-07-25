@@ -21,8 +21,10 @@
 }, false);*/
 
 
+
 $(document).ready(function(){
   var doc = $(document);
+  var userArr = {};
 
   // load from storage
   chrome.storage.sync.get(['DA'], function(data) {
@@ -33,15 +35,35 @@ $(document).ready(function(){
       muteList.append(mutedUser);
     } else {
       var muteList = doc.find(".mute_list").eq(0);
+      console.log(Object.keys(data));
       var mutedUser = $('<li>Users found: '+ Object.keys(data).length +'</li>')
       muteList.append(mutedUser);
     }
   });
 
   //form setup
-  doc.find("form.add_user").submit(function(e){
+  $("#add_user").submit(function(e){
     e.preventDefault();
-    $(this).children("input.name").attr("value","");
+    //alert($(this).children("input.name").length);
+    var inputNameField = $(this).find("input.name");
+    var inputName;
+
+    if (inputNameField.length > 0){
+      // TO DO: sanitization of value required
+      inputName = inputNameField.val();
+      
+      //save
+      userArr.push(inputName);
+      console.log("userArr ready:" + userArr);
+      chrome.storage.sync.set({'DA': userArr}, function() {
+          console.log('User successfully added: ' + inputName);
+        });
+      
+    }
+
+    //visual
+    inputNameField.val("");
+    console.log(inputName);
     
 
   });
