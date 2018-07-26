@@ -24,20 +24,23 @@
 
 $(document).ready(function(){
   var doc = $(document);
-  var userArr = {};
+  var currDomainUsers;
 
-  //debug: clear storage
-  //chrome.storage.sync.clear();
+  
 
-  // load from storage
+  //debug: clear everything
+  chrome.storage.sync.clear();
+
   chrome.storage.sync.get(['DA'], function(data) {
     console.warn(data);
     if(typeof data == undefined || Object.keys(data).length === 0){
       //SNS not in storage. Add one.
       console.log("Site 'DA' IS NOT FOUND");
-      storageSet('DA', {});
+      storageSet("DA", ["inay", "yogay"]);
     }
+    
 
+    
     currDomainUsers = data.DA;
 
     if (currDomainUsers == undefined || Object.keys(currDomainUsers).length === 0){
@@ -65,12 +68,14 @@ $(document).ready(function(){
       // TO DO: sanitization of value required
       inputName = inputNameField.val();
       
-      //save
-      userArr.push(inputName);
-      console.log("userArr ready:" + userArr);
-      chrome.storage.sync.set({'DA': userArr}, function() {
-          console.log('User successfully added: ' + inputName);
-        });
+      // add user
+      var today = new Date();
+      currDomainUsers[inputName] = `${today.getMonth()+1}/${today.getDate()}/${today.getFullYear()}`
+      
+
+      chrome.storage.sync.set({'DA': currDomainUsers}, function() {
+        console.log('User successfully added: '+ inputName + " on " + currDomainUsers[inputName]);
+      });
       
     }
 
@@ -84,9 +89,13 @@ $(document).ready(function(){
 });
 
 
-
 function storageSet(key, value){
-  chrome.storage.sync.set({key: value}, function() {
-    console.log('Stored {' +key+ " : "+ value +"}");
+  chrome.storage.sync.set({[key]: value}, function() {
+
+    chrome.storage.sync.get([key], function(datatest) {
+      console.log('Stored {' +key+ " : "+ datatest[key] +"}");
+      console.log(datatest);
+    });
+    
   });
 }
