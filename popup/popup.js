@@ -26,20 +26,15 @@ $(document).ready(function(){
   var doc = $(document);
   var currDomainUsers;
 
-  
-
   //debug: clear everything
-  chrome.storage.sync.clear();
+  //chrome.storage.sync.clear();
 
   chrome.storage.sync.get(['DA'], function(data) {
-    console.warn(data);
     if(typeof data == undefined || Object.keys(data).length === 0){
       //SNS not in storage. Add one.
       console.log("Site 'DA' IS NOT FOUND");
-      storageSet("DA", ["inay", "yogay"]);
+      storageSet("DA", {});
     }
-    
-
     
     currDomainUsers = data.DA;
 
@@ -52,8 +47,11 @@ $(document).ready(function(){
     } else {
       // list stored users
       var muteList = doc.find(".mute_list").eq(0);
-      var mutedUser = $('<li>Users found: '+ currDomainUsers +'</li>')
-      muteList.append(mutedUser);
+      for (var un in currDomainUsers){
+        if (currDomainUsers.hasOwnProperty(un)){
+          muteList.append('<li>'+ un +' | added '+currDomainUsers[un]+'</li>');
+        }
+      }
     }
   });
 
@@ -72,11 +70,8 @@ $(document).ready(function(){
       var today = new Date();
       currDomainUsers[inputName] = `${today.getMonth()+1}/${today.getDate()}/${today.getFullYear()}`
       
-
-      chrome.storage.sync.set({'DA': currDomainUsers}, function() {
-        console.log('User successfully added: '+ inputName + " on " + currDomainUsers[inputName]);
-      });
-      
+      storageSet('DA', currDomainUsers);
+ 
     }
 
     //visual
