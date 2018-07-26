@@ -26,17 +26,30 @@ $(document).ready(function(){
   var doc = $(document);
   var userArr = {};
 
+  //debug: clear storage
+  //chrome.storage.sync.clear();
+
   // load from storage
   chrome.storage.sync.get(['DA'], function(data) {
+    console.warn(data);
     if(typeof data == undefined || Object.keys(data).length === 0){
-      //no users recorded
+      //SNS not in storage. Add one.
+      console.log("Site 'DA' IS NOT FOUND");
+      storageSet('DA', {});
+    }
+
+    currDomainUsers = data.DA;
+
+    if (currDomainUsers == undefined || Object.keys(currDomainUsers).length === 0){
+      // no user added for this site
       var muteList = doc.find(".mute_list").eq(0);
       var mutedUser = $('<li>No user added</li>')
       muteList.append(mutedUser);
+
     } else {
+      // list stored users
       var muteList = doc.find(".mute_list").eq(0);
-      console.log(Object.keys(data));
-      var mutedUser = $('<li>Users found: '+ Object.keys(data).length +'</li>')
+      var mutedUser = $('<li>Users found: '+ currDomainUsers +'</li>')
       muteList.append(mutedUser);
     }
   });
@@ -69,3 +82,11 @@ $(document).ready(function(){
   });
 
 });
+
+
+
+function storageSet(key, value){
+  chrome.storage.sync.set({key: value}, function() {
+    console.log('Stored {' +key+ " : "+ value +"}");
+  });
+}
