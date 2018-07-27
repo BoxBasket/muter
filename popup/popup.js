@@ -28,6 +28,8 @@ $(document).ready(function(){
 
   //debug: clear everything
   doc.find('#clear').click(function(){
+    // note: only 1 id allowed on a DOM
+    console.log('Clear storage');
     chrome.storage.sync.clear();
   });
 
@@ -35,28 +37,33 @@ $(document).ready(function(){
   chrome.storage.sync.get(['DA'], function(data) {
     if(typeof data == undefined || Object.keys(data).length === 0){
       //SNS not in storage. Add one.
-      console.log("Site 'DA' IS NOT FOUND");
-      storageSet("DA", {});
-    }
-    
-    currDomainUsers = data.DA;
+      console.log("No dataset for 'DA'. Initializing.");
+      storageSet("DA", {}, listUsers, data);
+    } else {listUsers(data);}
+  });
 
-    if (currDomainUsers == undefined || Object.keys(currDomainUsers).length === 0){
-      // no user added for this site
-      var muteList = doc.find(".mute_list").eq(0);
-      var mutedUser = $('<li>No user added</li>')
-      muteList.append(mutedUser);
 
-    } else {
-      // list stored users
-      var muteList = doc.find(".mute_list").eq(0);
-      for (var un in currDomainUsers){
-        if (currDomainUsers.hasOwnProperty(un)){
-          muteList.append('<li>'+ un +' | added '+currDomainUsers[un]+'</li>');
+    var listUsers = function(data){
+      currDomainUsers = data.DA;
+
+      if (currDomainUsers == undefined || Object.keys(currDomainUsers).length === 0){
+        // no user added for this site
+        var muteList = doc.find(".mute_list").eq(0);
+        var mutedUser = $('<li>No user added</li>')
+        muteList.append(mutedUser);
+
+      } else {
+        // list stored users
+        var muteList = doc.find(".mute_list").eq(0);
+        for (var un in currDomainUsers){
+          if (currDomainUsers.hasOwnProperty(un)){
+            muteList.append('<li>'+ un +' | added '+currDomainUsers[un]+'</li>');
+          }
         }
       }
     }
-  });
+    
+    
 
   //form setup
   $("#add_user").submit(function(e){
@@ -71,6 +78,9 @@ $(document).ready(function(){
       
       // add user
       var today = new Date();
+      if (typeof currDomainUsers == undefined)
+        currDomainUsers = {};
+      
       currDomainUsers[inputName] = `${today.getMonth()+1}/${today.getDate()}/${today.getFullYear()}`
       
       storageSet('DA', currDomainUsers);
