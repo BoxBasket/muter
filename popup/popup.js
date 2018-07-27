@@ -27,7 +27,10 @@ $(document).ready(function(){
   var currDomainUsers;
 
   //debug: clear everything
-  //chrome.storage.sync.clear();
+  doc.find('#clear').click(function(){
+    chrome.storage.sync.clear();
+  });
+
 
   chrome.storage.sync.get(['DA'], function(data) {
     if(typeof data == undefined || Object.keys(data).length === 0){
@@ -83,8 +86,8 @@ $(document).ready(function(){
 
 });
 
-
-function storageSet(key, value){
+function storageSet(key, value, callback){
+  
   chrome.storage.sync.set({[key]: value}, function() {
 
     chrome.storage.sync.get([key], function(datatest) {
