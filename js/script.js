@@ -7,6 +7,8 @@ var isStandby = false;
 var intervalObj;
 var userData = {};
 
+var memory = {};
+
 // load from storage
 chrome.storage.sync.get(['DA'], function(data) {
 	if(typeof data == undefined || Object.keys(data).length === 0){
@@ -30,17 +32,41 @@ $(document).ready(function(){
 
 
 function checkDOM() {
- 		if($(document).find(".sender").length > 0){
- 		  muteUser();
- 		  clearInterval(intervalObj);
- 		}
+	if($(document).find(".sender").length > 0){
+	  muteUser();
+	  clearInterval(intervalObj);
+	}
 
- 		currInterval+= INTERVAL_MILISEC;
- 		if(currInterval>=TIMEOUT_SEC*1000){
- 			clearInterval(intervalObj);
- 			isStandby = false;
- 		}
- 	}
+	currInterval+= INTERVAL_MILISEC;
+	if(currInterval>=TIMEOUT_SEC*1000){
+		clearInterval(intervalObj);
+		isStandby = false;
+	}
+}
+
+function checkDOM_byProp() {
+
+	currInterval+= INTERVAL_MILISEC;
+	if(currInterval>=TIMEOUT_SEC*1000){
+		clearInterval(intervalObj);
+		isStandby = false;
+
+		return;
+	}
+  
+  if (memory.hasOwnProperty("oldNoteId")){
+  	var currNoteDOM = $(document).find("#current-note").eq(0);
+  	var currNoteId = currNoteDOM.find("form").eq(0).children('input[name="noteids[]"]').attr("value");
+  	if (currNoteId && currNoteId == memory["oldNoteId"]){
+  		console.warn("MATCH VALIDATED");
+  		cssBlur(currNoteDOM, "4");
+  	}
+  } else {
+  	clearInterval(intervalObj);
+  }
+
+}
+
 
 function muteUser(targetUsername) {
   
@@ -88,9 +114,21 @@ function muteUser(targetUsername) {
   
 }
 
+function cssBlur($target, magnitude){
+	magnitude = magnitude || "3";
+	magnitude = magnitude.toString();
+
+	$target.css("filter", "blur("+magnitude+"px)");
+}
 function ghostUserDOM(){
 
 }
+
+/* ------------------------------- */
+/* ------------------------------- */
+//           LISTENERS
+/* ------------------------------- */
+/* ------------------------------- */
 
 chrome.storage.onChanged.addListener(function(changes, namespace) {
   for (key in changes) {
@@ -110,6 +148,7 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
     	// TO DO: clear all effects
     
     } else {
+
 			if (oldVal == undefined || typeof oldVal == undefined || Object.keys(oldVal) === 0){
 				// Case 1: old value is empty. So all users are valid
 			} else {
@@ -130,18 +169,23 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
 					//update ghosting
 					muteUser(newUsers[i]);
 				}
-
-
-
 			}
     }
-
-
-
-
-
-
-  }
+  } // end: for each key
 });
 
-	
+
+document.addEventListener("click", function(e){
+  var target = e.target || e.srcElement;
+
+  var noteId = $(target).closest("[data-noteid]").attr("data-noteid");
+  noteId = noteId ? noteId : -1;
+
+  memory["oldNoteId"] = noteId;
+
+  if(noteId > 0){
+    currInterval = 0; //reset
+    intervalObj = window.setInterval(checkDOM_byProp, INTERVAL_MILISEC);
+		isStandby = true;
+  }
+});
