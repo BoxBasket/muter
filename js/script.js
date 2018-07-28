@@ -1,5 +1,5 @@
-var TIMEOUT_SEC = 10; 
-var INTERVAL_MILISEC = 100;
+var TIMEOUT_SEC = 8; 
+var INTERVAL_MILISEC = 60;
 
 //memory
 var currInterval = 0;
