@@ -1,5 +1,6 @@
-var TIMEOUT_SEC = 8; 
+var TIMEOUT_SEC = 10; 
 var INTERVAL_MILISEC = 60;
+var NAMESPACE = "muterextension";
 
 //memory
 var currInterval = 0;
@@ -59,7 +60,32 @@ function checkDOM_byProp() {
   	var currNoteId = currNoteDOM.find("form").eq(0).children('input[name="noteids[]"]').attr("value");
   	if (currNoteId && currNoteId == memory["oldNoteId"]){
   		console.warn("MATCH VALIDATED");
+  		// blur message
   		cssBlur(currNoteDOM.find(".mcb-body.wrap-text").eq(0), "4");
+
+  		// hide reply box
+  		var replyBox = $(document).find(".notes-right").children(".push.compose_frame").eq(0);
+  		if (replyBox.length < 1){return;}
+
+  		var replyShowButton = $('<a href="#" id="'+NAMESPACE+'_show_reply">Show reply box</a>');
+  		replyBox.parent().find("#"+NAMESPACE+"_show_reply").remove();
+  		replyShowButton.insertBefore(replyBox);
+
+  		// hide
+  		replyBox.css("display", "none"); 
+  		// show
+  		replyShowButton.click(function(e){
+  			e.preventDefault();
+  			console.warn("display replybox again");
+  			console.warn(replyBox.length);
+  			// replyBox.css("display","default");
+  			// Reference to old replyBox is gone because DA refreshes the DOMs?
+  			//replyBox = $(document).find(".notes-right").children(".push.compose_frame").eq(0);
+  			replyBox.css("display", ""); 
+  			$(this).remove();
+  		});
+
+
   		clearInterval(intervalObj);
   	}
   } else {
