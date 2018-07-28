@@ -59,7 +59,8 @@ function checkDOM_byProp() {
   	var currNoteId = currNoteDOM.find("form").eq(0).children('input[name="noteids[]"]').attr("value");
   	if (currNoteId && currNoteId == memory["oldNoteId"]){
   		console.warn("MATCH VALIDATED");
-  		cssBlur(currNoteDOM, "4");
+  		cssBlur(currNoteDOM.find(".mcb-body.wrap-text").eq(0), "4");
+  		clearInterval(intervalObj);
   	}
   } else {
   	clearInterval(intervalObj);
