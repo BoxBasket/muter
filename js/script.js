@@ -60,6 +60,10 @@ function checkDOM_byProp() {
   	var currNoteId = currNoteDOM.find("form").eq(0).children('input[name="noteids[]"]').attr("value");
   	if (currNoteId && currNoteId == memory["oldNoteId"]){
   		console.warn("MATCH VALIDATED");
+
+  		// unblur the pre-blur
+  		cssBlur($(document).find(".notes-right"), "0");
+
   		// blur message
   		cssBlur(currNoteDOM.find(".mcb-body.wrap-text").eq(0), "4");
 
@@ -76,11 +80,6 @@ function checkDOM_byProp() {
   		// show
   		replyShowButton.click(function(e){
   			e.preventDefault();
-  			console.warn("display replybox again");
-  			console.warn(replyBox.length);
-  			// replyBox.css("display","default");
-  			// Reference to old replyBox is gone because DA refreshes the DOMs?
-  			//replyBox = $(document).find(".notes-right").children(".push.compose_frame").eq(0);
   			replyBox.css("display", ""); 
   			$(this).remove();
   		});
@@ -118,6 +117,11 @@ function muteUser(targetUsername) {
 				    if (usernameText == un.toLowerCase()){
 				    	console.warn("ghosting %s", un);
 				    	$(this).parentsUntil(".note").find('.note-preview').css("filter", "blur(3px)");
+				    	
+				    	//flag the link
+				    	memory["mutedClassName"] = NAMESPACE+"_muted_user";
+				    	$(this).closest("li").addClass(memory["mutedClassName"] );
+
 				    }
 				  } // end: for()
 
@@ -205,14 +209,33 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
 document.addEventListener("click", function(e){
   var target = e.target || e.srcElement;
 
-  var noteId = $(target).closest("[data-noteid]").attr("data-noteid");
-  noteId = noteId ? noteId : -1;
+  // clear any blurs
+  var noteContainer = $(document).find(".notes-right").eq(0);
+  
 
-  memory["oldNoteId"] = noteId;
+  if (memory.hasOwnProperty("mutedClassName")){
+  	if ($(target).closest("li").hasClass(memory["mutedClassName"])){
+  		//user clicked note that has been flagged
+  		console.warn("You clicked muted user's message!");
+  		cssBlur(noteContainer);
 
-  if(noteId > 0){
-    currInterval = 0; //reset
-    intervalObj = window.setInterval(checkDOM_byProp, INTERVAL_MILISEC);
-		isStandby = true;
+  		// remember old Id
+  		var noteId = $(target).closest("[data-noteid]").attr("data-noteid");
+			noteId = noteId ? noteId : -1;
+			memory["oldNoteId"] = noteId;
+
+			if(noteId > 0){
+			  currInterval = 0; //reset
+			  intervalObj = window.setInterval(checkDOM_byProp, INTERVAL_MILISEC);
+				isStandby = true;
+			}
+
+  	} else {
+  		cssBlur(noteContainer, "0");
+  	}
+
   }
+
+
+  
 });
