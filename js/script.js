@@ -1,5 +1,5 @@
-var TIMEOUT_SEC = 10; 
-var INTERVAL_MILISEC = 60;
+var TIMEOUT_SEC = 8; 
+var INTERVAL_MILISEC = 100;
 var NAMESPACE = "muterextension";
 
 //memory
@@ -108,24 +108,19 @@ function muteUser(targetUsername) {
 
 				var usernameText = $(this).text().toLowerCase();
 				
-				if(usernameText.indexOf(usernameMatch)>=0){
-					// hardcoded user
-					$(this).parentsUntil(".note").find('.note-preview').css("filter", "blur(3px)");
-				} else {
-					// stored user
-					for (var un in userData) {
-				    if (usernameText == un.toLowerCase()){
-				    	console.warn("ghosting %s", un);
-				    	$(this).parentsUntil(".note").find('.note-preview').css("filter", "blur(3px)");
-				    	
-				    	//flag the link
-				    	memory["mutedClassName"] = NAMESPACE+"_muted_user";
-				    	$(this).closest("li").addClass(memory["mutedClassName"] );
+				// check against each stored user
+				for (var un in userData) {
+			    if (usernameText == un.toLowerCase()){
+			    	cssBlur($(this).parentsUntil(".note").find('.note-preview'), "4");
+			    	
+			    	//flag the link
+			    	memory["mutedClassName"] = NAMESPACE+"_muted_user";
+			    	$(this).closest("li").addClass(memory["mutedClassName"] );
 
-				    }
-				  } // end: for()
+			    }
+			  } // end: for()
 
-				}
+				
 
 			});
 		}); //end: $(document).find()
@@ -137,7 +132,7 @@ function muteUser(targetUsername) {
   		var usernameText = $(this).find(".username").text().toLowerCase();
 
   		if(usernameText.indexOf(targetUsername.toLowerCase())>=0){
-  			$(this).parentsUntil(".note").find('.note-preview').css("filter", "blur(3px)");
+  			cssBlur($(this).parentsUntil(".note").find('.note-preview'), "4");
   		}
   		  	
   	});
@@ -151,6 +146,7 @@ function cssBlur($target, magnitude){
 
 	$target.css("filter", "blur("+magnitude+"px)");
 }
+
 function ghostUserDOM(){
 
 }

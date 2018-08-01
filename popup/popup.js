@@ -20,6 +20,9 @@
   }, false);
 }, false);*/
 
+var userListTemplate = `
+<li>{} | added {} | <a href="#" class="user_delete">delete</a></li>
+`
 
 
 $(document).ready(function(){
@@ -42,27 +45,51 @@ $(document).ready(function(){
     } else {listUsers(data);}
   });
 
+  var bind_deleteUser = function(){
+    // function for binding 'delete' link next to users
 
-    var listUsers = function(data){
-      currDomainUsers = data.DA;
+  }
+  
+  var appendOneUser = function($muteList, username, dateAdded){
 
-      if (currDomainUsers == undefined || Object.keys(currDomainUsers).length === 0){
-        // no user added for this site
-        var muteList = doc.find(".mute_list").eq(0);
-        var mutedUser = $('<li>No user added</li>')
-        muteList.append(mutedUser);
+    var userLiObj = $(useTemplate(userListTemplate, [ username, dateAdded ]));
+    $muteList.append(userLiObj);
 
-      } else {
-        // list stored users
-        var muteList = doc.find(".mute_list").eq(0);
-        for (var un in currDomainUsers){
-          if (currDomainUsers.hasOwnProperty(un)){
-            muteList.append('<li>'+ un +' | added '+currDomainUsers[un]+'</li>');
-          }
+    // bind delete event
+    userLiObj.children("a.user_delete").click(function(e){
+      e.preventDefault();
+      storageRemove(username); 
+      //visual
+      userLiObj.remove();
+
+    });
+  }
+
+
+  var listUsers = function(data){
+    currDomainUsers = data.DA;
+
+    if (currDomainUsers == undefined || Object.keys(currDomainUsers).length === 0){
+      // no user added for this site
+      var muteList = doc.find(".mute_list").eq(0);
+      var mutedUser = $('<li>No user added</li>')
+      muteList.append(mutedUser);
+
+    } else {
+      
+      // list stored users
+      var $muteList = doc.find(".mute_list").eq(0);
+      for (var un in currDomainUsers){
+        if (currDomainUsers.hasOwnProperty(un)){
+          // add each user
+          appendOneUser($muteList, un, currDomainUsers[un]);
         }
       }
+
     }
-    
+  }
+  
+
     
 
   //form setup
@@ -84,10 +111,14 @@ $(document).ready(function(){
       currDomainUsers[inputName] = `${today.getMonth()+1}/${today.getDate()}/${today.getFullYear()}`
       
       storageSet('DA', currDomainUsers);
- 
+
+      // Add to popup
+      var $muteList = doc.find(".mute_list").eq(0);
+      appendOneUser($muteList, inputName, currDomainUsers[inputName]);
+      
     }
 
-    //visual
+    // Clean up
     inputNameField.val("");
     console.log(inputName);
     
@@ -106,4 +137,38 @@ function storageSet(key, value, callback){
     });
     
   });
+}
+
+function storageRemove(un, callback){
+  // not an actual remove. Because I keep everything sorted by a site,
+  // you must modify the dataset...
+ 
+  // get the data for the current site
+  // Using DA for now
+  var currSite = 'DA';
+  var currSiteData;
+  chrome.storage.sync.get([currSite], function(datatest) {
+   
+    //remove on key
+    currSiteData = datatest[currSite];
+
+    if(currSiteData.hasOwnProperty(un) ){
+      delete currSiteData[un];
+    } 
+
+    //put it back to storage
+    storageSet(currSite, currSiteData);
+
+  });
+}
+
+
+function useTemplate(template, data){
+  var templateElemArr = template.split("{}");
+  var templateOut = templateElemArr[0];
+  for(var i=1; i<templateElemArr.length;i++){
+    templateOut += data[i-1]+templateElemArr[i];
+  }
+
+  return templateOut;
 }
