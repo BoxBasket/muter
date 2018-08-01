@@ -1,0 +1,32 @@
+body, html{
+	font-family: 'Quicksand', sans-serif;
+	color: #2d2d2d;
+	padding: 0; margin: 0;
+	font-size: 0.9em;
+}
+
+.container {
+	min-width: 300px;
+	padding: 10px;
+}
+
+.container.form{
+	border-top: 1px solid #e0e0e0;
+}
+
+ul.mute_list{
+	list-style-type: none;
+	padding: 0;
+}
+
+input[type="text"]{
+	padding: 10px;
+	border: 1px solid #8790ff;
+	color: #8790ff;
+}
+input[type="submit"]{
+	padding: 10px;
+	background-color: #8790ff;
+	color: #dbddff;
+	border:0px solid;
+}
